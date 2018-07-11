@@ -1,0 +1,31 @@
+Mokarra (C)opyright 2011-2015, Leafscale, Inc.
+
+------------------------------------------------------------------------------
+REQUIREMENTS
+------------------------------------------------------------------------------
+To install mokarra, you will need the following minimum requirements:
+  * Linux - tested on AMD64
+  * FreePascal Compiler >= 2.6.4 (fpc) including RTL & FCL units
+  * Rake >= 10.0 - (requires ruby, >=1.9)
+
+------------------------------------------------------------------------------
+BUILD
+------------------------------------------------------------------------------
+
+------------------------------------------------------------------------------
+INSTALL
+------------------------------------------------------------------------------
+Currently, Mokarra is a static binary. Copy the resulting file 'mokarra' to
+a directory within your path.  A configuration file is not shipped with the
+distribution, but the mokarra tool will help you create one.
+
+ #  mokarra -c 
+
+You will need filesystem permission to create /etc/mokarra.cfg
+
+------------------------------------------------------------------------------
+USING REEF
+------------------------------------------------------------------------------
+To use REEF, you will need an existing snapshot of a perbuilt REEF directory
+layout, or you will need to create one from scratch.  See the REEF document
+for more information.

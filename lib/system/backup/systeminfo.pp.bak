@@ -1,0 +1,275 @@
+{*****************************************************************************}
+{ Mokarra                                                                     }
+{   (C)opyright 2012 - LeafScale Systems, Inc.                                }
+{                                                                             }
+{ This software is protected under the LeafScale Software License             }
+{                                                                             }
+{*****************************************************************************}
+{$H+}
+
+unit SystemInfo;
+
+interface
+
+uses
+  Classes, SysUtils, BaseUnix, Crt, TextUtils, StrUtils;
+
+type
+    SystemInformation = RECORD
+      HWPlatform    : String;
+      KernelName    : String;
+      KernelVersion : String;
+      OSVendor      : String;
+      OSName        : String;
+      OSVersion     : String;
+      ReleaseFile   : String;
+    end;
+
+    OperatingSystem = RECORD
+      OSVendor      : String;
+      OSName        : String;
+      OSVersion     : String;
+      ReleaseFile   : String;
+    end;
+
+
+
+function SystemGetRecord() : SystemInformation;
+procedure SystemDisplayInfo();
+function SystemDetectPlatform() : SystemInformation;
+function SystemDetectLinuxOS() : OperatingSystem;
+function SystemDetectBsdOS() : String;
+// The following are reserved functions (to be implemented in a later version)
+function SystemDetectWindowsOS() : String;
+function SystemDetectHaikuOS() : String;
+function SystemDetectArosOS() : String;
+function SystemDetectEcomstationOS() : String;
+function SystemDetectOtherOS() : String;
+
+
+implementation
+
+{* Get the SystemInformation Record and return it as such *}
+function SystemGetRecord() : SystemInformation;
+  var
+    SysInfo : SystemInformation;
+begin
+    SysInfo := SystemDetectPlatform;
+    Result := SysInfo;
+end;
+
+{* Print platform detection data *}
+procedure SystemDisplayInfo;
+  var
+    SysInfo : SystemInformation;
+begin
+     SysInfo := SystemDetectPlatform;
+     TextColor(Blue);
+     writeln();
+     writeln('Platform Detection Information');
+     TextColor(DarkGray);
+     writeln('-----------------------------------------------------------------------------');
+       TextColor(LightBlue);
+       write('Platform  : ');
+     TextColor(LightCyan);
+     writeln(Sysinfo.HWPlatform);
+
+       TextColor(LightBlue);
+       write('OS Kernel : ');
+     TextColor(LightCyan);
+     writeln(Sysinfo.KernelName, ' (', Sysinfo.KernelVersion, ')');
+
+       TextColor(LightBlue);
+       write('OS Vendor : ');
+     TextColor(LightCyan);
+     writeln(SysInfo.OSVendor);
+
+       TextColor(LightBlue);
+       write('OS Version: ');
+     TextColor(LightCyan);
+     writeln(SysInfo.OSVersion);
+
+       TextColor(LightBlue);
+       write('OS Name   : ');
+     TextColor(LightCyan);
+     writeln(SysInfo.OSName);
+
+       TextColor(LightBlue);
+       write('Release   : ');
+     TextColor(LightCyan);
+     writeln(SysInfo.ReleaseFile);
+     TextColor(LightGray);
+
+end;
+
+
+{* Detect the Platform and store as a Type *}
+function SystemDetectPlatform() : SystemInformation;
+  var
+    DetectedPlatform : SystemInformation;
+    SystemUname      : UtsName;
+    SystemOS         : OperatingSystem;
+begin
+    FpUname(SystemUname);
+    DetectedPlatform.HWPlatform:=SystemUname.Machine;
+    DetectedPlatform.KernelName:=SystemUname.Sysname;
+    DetectedPlatform.KernelVersion:=SystemUname.Release;
+    if DetectedPlatform.KernelName = 'Linux' then
+        SystemOS := SystemDetectLinuxOS;
+    DetectedPlatform.OSVendor:=SystemOS.OSVendor;
+    DetectedPlatform.OSName:=SystemOS.OSName;
+    DetectedPlatform.OSVersion:=SystemOS.OSVersion;
+    DetectedPlatform.ReleaseFile:=SystemOS.ReleaseFile;
+    Result := DetectedPlatform
+end;
+
+{* Determine Linux Vendor & Version *}
+function SystemDetectLinuxOS() : OperatingSystem;
+  var
+    info : stat;
+    DetectedOS : OperatingSystem;
+    ReleaseString: String;
+    Delim : TSysCharSet = [' '];
+begin
+
+     // LSB Compliant Release File - look here first
+     if fpstat('/etc/lsb-release',info) = 0 then
+     begin
+       DetectedOS.ReleaseFile:='/etc/lsb-release';
+       DetectedOS.OSVendor  := ParseTextLineVariable(GetTextLineBySubStr('/etc/lsb-release','DISTRIB_ID'), '=');
+       DetectedOS.OSVersion := ParseTextLineVariable(GetTextLineBySubStr('/etc/lsb-release','DISTRIB_RELEASE'), '=');
+       DetectedOS.OSName    := ParseTextLineVariable(GetTextLineBySubStr('/etc/lsb-release','DISTRIB_DESCRIPTION'), '=');
+       exit(DetectedOS);
+     end;
+
+     // SharkOS
+     if fpstat('/etc/sharkos-release',info) = 0 then
+     begin
+       DetectedOS.ReleaseFile:='/etc/sharkos-release';
+       DetectedOS.OSVendor := ParseTextLineVariable(GetTextLineBySubStr('/etc/sharkos-release','dist'), '=');
+       DetectedOS.OSVersion := ParseTextLineVariable(GetTextLineBySubStr('/etc/sharkos-release','vers'), '=');
+       DetectedOS.OSName := ParseTextLineVariable(GetTextLineBySubStr('/etc/sharkos-release','kern'), '=');
+       exit(DetectedOS);
+     end;
+
+     // RedHat Compatible (system-release)
+     if fpstat('/etc/system-release',info) = 0 then
+     begin
+       ReleaseString := GetTextLineByNum('/etc/system-release',1);
+       if AnsiContainsText(ReleaseString, 'Red Hat Enterprise Linux Server') = TRUE then
+         begin
+           DetectedOS.OSVendor  := 'RedHat';
+           DetectedOS.OSVersion := ExtractDelimited(7,ReleaseString,Delim);
+           DetectedOS.OSName    := ReleaseString;
+         end;
+       DetectedOS.ReleaseFile:='/etc/system-release';
+       exit(DetectedOS);
+     end;
+
+     // Fedora
+     if fpstat('/etc/fedora-release',info) = 0 then
+     begin
+       DetectedOS.OSVendor := 'Fedora';
+       exit(DetectedOS);
+     end;
+
+     // YellowDog Linux
+     if fpstat('/etc/yellowdog-release',info) = 0 then
+     begin
+       DetectedOS.OSVendor := 'YellowDog';
+       exit(DetectedOS);
+     end;
+
+     // Red Hat Enterprise Linux - Systems prior to system-release file
+     if fpstat('/etc/redhat-release',info) = 0 then
+     begin
+       DetectedOS.OSVendor := 'RedHat';
+       exit(DetectedOS);
+     end;
+
+     // SuSE Enterprise Linux
+     if fpstat('/etc/sles-release',info) = 0 then
+     begin
+       DetectedOS.OSVendor:= 'Novell';
+       DetectedOS.OSName  := 'SLES';
+       exit(DetectedOS);
+     end;
+
+     // SuSE Linux
+     if fpstat('/etc/SuSE-release',info) = 0 then
+     begin
+       DetectedOS.OSVendor:= 'SuSE';
+       exit(DetectedOS);
+     end;
+
+     // ArchLinux
+     if fpstat('/etc/arch-release',info) = 0 then
+     begin
+       DetectedOS.OSVendor:= 'ArchLinux';
+       exit(DetectedOS);
+     end;
+
+     // Debian System
+     if fpstat('/etc/debian_version',info) = 0 then
+     begin
+       //write('Debian Based System');
+       // TODO: Dig Deeper - Find Variants when possible *bunutu, etc
+       DetectedOS.OSVendor:= 'Debian';
+       // TODO: Get Version
+       exit(DetectedOS);
+     end;
+
+     // Slackware
+     if fpstat('/etc/slackware-version',info) = 0 then
+     begin
+       DetectedOS.OSVendor:= 'slackware';
+       exit(DetectedOS);
+     end;
+
+    // If all else fails, set to unknown
+    DetectedOS.OSVendor:='Unknown';
+    DetectedOS.OSName:='Unknown';
+    DetectedOS.OSVersion:='Unknown';
+    Writeln('Unknown Linux Distribution');
+    Result := DetectedOS
+end;
+
+{* Determine BSD Vendor & Version *}
+function SystemDetectBsdOS() : STRING;
+begin
+ Result := 'BSD SUPPORT NOT READY'
+end;
+
+{* Determine Windows OS Version*}
+function SystemDetectWindowsOS() : STRING;
+begin
+ Result := 'WINDOWS SUPPORT NOT READY'
+end;
+
+{* Determine Haiku OS Version*}
+function SystemDetectHaikuOS() : STRING;
+begin
+ Result := 'HAIKUOS SUPPORT NOT READY'
+end;
+
+{* Determine Aros OS Version*}
+function SystemDetectArosOS() : STRING;
+begin
+ Result := 'AROS SUPPORT NOT READY'
+end;
+
+{* Determine Ecomstation OS Version*}
+function SystemDetectEcomstationOS() : STRING;
+begin
+ Result := 'ECOMSTATION SUPPORT NOT READY'
+end;
+
+{* Determine Other OS ? *}
+function SystemDetectOtherOS() : STRING;
+begin
+ Result := 'UNKNOWN OS DETECTED'
+end;
+
+{* Unit End*}
+end.
+{* Unit End*}

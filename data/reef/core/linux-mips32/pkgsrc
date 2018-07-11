@@ -1,0 +1,16 @@
+{"pkgsrc":
+    {
+    "name":        "linux-mips32",
+    "version":     3.10,
+    "arch":        ["mips32"],
+    "revision":    1,
+    "description": "Linux Kernel for MIPS32 processor family",
+    "owner":       "Leafscale, Inc.",
+    "category":    "core",
+    "build_deps":  ["make", "gcc"],
+    "depends":     ["filesystem"],
+    "project_url": "http://www.kernel.org",
+    "project_src": "https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.17.1.tar.xz",
+    "distfiles":   ["linux-3.17.1.tar.xz"],
+    }
+}

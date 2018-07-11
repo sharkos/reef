@@ -1,0 +1,16 @@
+{"pkgsrc":
+    {
+    "name":        "linux-armv7",
+    "version":     3.16,
+    "arch":        ["armv7"],
+    "revision":    1,
+    "description": "Linux Kernel for ARMv7 Processors",
+    "owner":       "Leafscale, Inc.",
+    "category":    "core",
+    "build_deps":  ["make", "gcc"],
+    "depends":     ["filesystem"],
+    "project_url": "http://www.kernel.org",
+    "project_src": "https://www.kernel.org/pub/linux/kernel/v3.x/linux-3.17.1.tar.xz",
+    "distfiles":   ["linux-3.17.1.tar.xz"],
+    }
+}

@@ -1,0 +1,9 @@
+{"mokarra": 
+  { "version" : 3,
+    "reefversion": 20141003,
+    "reefindex": 
+       { "core" : [ "filesystem", "zsh", "linux"],
+         "lua" :  ["lua","luarocks"]
+       }
+  }
+}

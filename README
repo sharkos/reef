@@ -1,0 +1,12 @@
+Mokarra - unfinished code - an FPC based package manager
+
+Name for "Sphyrna mokarran", the largest species of hammerhead shark.  The idea behind this program
+is to develop a package mangement system based on JSON formatted metadata. While not functionally
+complete, the current code (as of 20180711) demonstrates a basic proof of concept.  The code is
+provided as reference for how to use several of the ObjectPascal FPC provided libraries as well 
+as some custom written procedures/functions.
+
+The project uses ruby 'rake' to build
+
+data/reef : The metadata information
+

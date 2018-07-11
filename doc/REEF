@@ -1,0 +1,107 @@
+------------------------------------------------------------------------------
+REEF
+------------------------------------------------------------------------------
+REEF is the SharkOS package manager and build system. Reef is not an acronym.
+In marine environments, a Reef is a crucial part of the ecosystem.  It is a 
+home and breeding ground to many species of life.  In SharkOS, Reef is the
+building blocks of the operating system.  Packages are created from Reef files
+using Mokarra.  Mokarra can also install pre-build binary packages, provides
+a user interface to create and manage reef fiels, and also builds & maintains
+the reef index and repo files.
+
+------------------------------------------------------------------------------
+REEF Directory Structure
+------------------------------------------------------------------------------
+Mokarra expects information to be stored in a specific directory layout and
+specific files to exist.  REEF includes a "CreateReefIndex" function that will
+scan and generate an index file.  The layout starts with the PkgSrc root as
+set in the MasterConfig file variable [REEF] ... root=
+
+Recommended layout:
+
+/sharkos/reef
+ |
+ : reef.idx
+ |
+ : /core
+    |
+    : core.repo
+    |
+    : /pkgname
+       |
+       : pkgname.pkgsrc
+       : build
+       : checksum
+       : pre_script
+       : post_script
+ : /db
+    |
+    : db.repo
+    |
+    : / pkgname
+  ...and so on...
+
+Reef creates the IDX file and repo files. Note that the repo filename is the
+same as the directory that contains the pkgsrc below them.  Packages are also
+named the same as the containing directory and end with a .pkgsrc extension
+
+------------------------------------------------------------------------------
+Example REEF Index File - JSON Format
+------------------------------------------------------------------------------
+{"mokarra":
+  { "version" : 3,
+    "reefversion": 20141003,
+    "reefindex":
+       { "core" : [ "filesystem", "zsh", "linux"],
+         "lua" :  ["lua","luarocks"]
+       }
+  }
+}
+
+------------------------------------------------------------------------------
+Example REEF Repo File - JSON Format
+------------------------------------------------------------------------------
+// Note, reefversion should match index version.  Repo files should be a
+// summary highlight of the pkgsrc files below.  This speeds up searchs
+// and creates a cache of information.
+
+{"mokarra":
+  { "reefversion": 20141003,
+    "core":
+    { "filesystem"   :
+      { "version"    : "0.03",
+        "revision"   : 1,
+        "description": "Filesystem provides the base layout of the OS"
+      },
+    { "linux" :
+      { "version"    : "3.16.3",
+        "revision"   : 1,
+        "description": "Linux kernel with SharkOS default config"
+      }
+    }
+  }
+}
+
+------------------------------------------------------------------------------
+Example REEF pkgsrc File - JSON Format
+------------------------------------------------------------------------------
+
+{"pkgsrc":
+  {
+  "name": "lua",
+  "version":     5.2,
+  "revision":    1,
+  "description": "Lua is a powerful, fast, lightweight, embeddable scripting language.",
+  "owner":       "Leafscale, Inc.",
+  "categorgy":   "lua",
+  "build_deps":  ["make", "gcc"],
+  "depends":     ["filesystem"],
+  "project_url": "http://www.lua.org",
+  "project_src": "http://www.lua.org/ftp/lua-5.2.3.tar.gz",
+  "distfiles":   ["lua-5.2.3.tar.gz"],
+  "patches": []
+  }
+}
+
+------------------------------------------------------------------------------
+

@@ -1,0 +1,16 @@
+{"pkgsrc":
+    {
+    "name":        "lua52",
+    "version":     5.2,
+    "revision":    1,
+    "arch":        ["amd64","armv7","mips32"],
+    "description": "Lua is a powerful, fast, lightweight, embeddable scripting language.",
+    "owner":       "Leafscale, Inc.",
+    "category":    "lua",
+    "build_deps":  ["make", "gcc"],
+    "depends":     ["filesystem"],
+    "project_url": "http://www.lua.org",
+    "project_src": "http://www.lua.org/ftp/lua-5.2.3.tar.gz",
+    "distfiles":   ["lua-5.2.3.tar.gz"],
+    }
+}
